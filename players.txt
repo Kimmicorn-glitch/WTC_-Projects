@@ -1,0 +1,11 @@
+players = []  
+player_types = []  # Track if player is human or computer  
+for i in range(num_players):  
+    player_type = input(f"Player {i+1} - Enter 'h' for human, 'c' for computer: ").strip().lower()  
+    if player_type == 'c':  
+        players.append(f"Computer {i+1}")  
+        player_types.append('computer')  
+    else:  
+        name = input(f"Enter Player {i+1} name: ").strip()  
+        players.append(name)  
+        player_types.append('human')
