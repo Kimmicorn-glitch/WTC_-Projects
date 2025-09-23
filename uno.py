@@ -107,6 +107,9 @@ def colour_card_text(card, dark_side):
         colour_code = {
             "Red": light_red, "Yellow": light_yellow, "Green": light_green, "Blue": light_blue
         }.get(colour_name,RESET)
+    
+    if card[0] == "Wild":
+        return f"{wild_colour}{card[2]}{REST}"
     return f"{colour_code}{colour_name} {card[2]}{RESET}"
 
 
@@ -177,6 +180,40 @@ def player_turn(player, hand, top_card, dark_side, deck, players, hands, pending
                 print(f"Invalid card number {choice}. Use 1 to {len(hand)}.")
         else:
             print("Invalid input. The abyss mocks your typing.")
+
+def computer_turn(player, hand,deck,dark_side,hands,pending_draw,discard_pile,current_colour):
+    time.sleep(1.5)
+    playable = []
+    i = 0
+    while i < len(hand):
+        card = hand[i]
+        card_colour = card[i] if dark_side else card[0]
+        can_play = (card_colour == current_colour or card[2] == top_card[2] or card[0] == "Wild")
+        if pending_draw > 0 and card[2] not in ["Draw Two","Draw Four"]:
+            pass
+        elif can_play:
+            playable.append((i,card))
+        i += 1
+        if playable:
+            idx,card = random.choice(player)
+            hand.pop(idx)
+            print(f"{player} plays {colour_card_text(card, dark_side)}")
+            grim_humor()
+            if card[2] == "Draw Two":
+                pending_draw += 2
+                current_colour = card[i] if dark_side else card[0]
+            elif card[2] == "Draw Four":
+                pending_draw += 4
+                valid_colours = Light_Colours if not dark_side else Dark_Colours 
+                current_colour = random.choice(valid_colours)
+            elif card[2] == "Flip":
+                current_colour = card[1] if dark_side else card[0]
+            else:
+                current_colour = card[1] if dark_side else card[0]
+            return card,pending_draw,current_colour
+        else:
+            draw_stack_animation(player, max(1,pending_draw)deck,hand,players,discard_pile)
+            return None,0,current_colour
 
 def flip_all(hands, dark_side, deck, discard_pile):
     frames = ["[/////]", "[\\\\\\\\]", "[/////]", "[\\\\\\\\]"]
@@ -285,7 +322,7 @@ def main():
                     while True:
                         new_colour = input(f"{current}, choose a new colour: ").capitalize()
                         if new_colour in valid_colours:
-                            discard_pile[-1] = (played[0], new_colour, "Draw Four")
+                            discard_pile[-1] = (new_colour, new_colour, "Draw Four")
                             break
                         print(f"Invalid colour. Choose from {', '.join(valid_colours)}.")
                                     
